@@ -111,7 +111,7 @@ String json = new ObjectMapper().writeValueAsString(dto);
   BDDMockito.given(service.save(Mockito.any(Book.class))).willReturn(saveBook);
 ```
 
-```
+
 @RestController
 @RequestMapping(value = "/books")
 public class BookController {
