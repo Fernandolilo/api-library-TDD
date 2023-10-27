@@ -1,6 +1,7 @@
 package com.systempro.testes.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.systempro.testes.domain.dto.BookDTO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +14,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -33,7 +33,14 @@ public class BookControllerTest {
     @Test
     @DisplayName("Created Book")
     public void createBookTest() throws Exception{
-        String json = new ObjectMapper().writeValueAsString(null);
+        BookDTO dto = BookDTO
+                .builder()
+                .id(1L)
+                .autor("Fernando")
+                .title("Meu Livro")
+                .isbn("123456")
+                .build();
+        String json = new ObjectMapper().writeValueAsString(dto);
 
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(BOOK_API)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -44,9 +51,9 @@ public class BookControllerTest {
                 .perform(request)
                 .andExpect(status().isCreated() )
                 .andExpect( jsonPath( "id").isNotEmpty() )
-                .andExpect( jsonPath( "title").value("Meu Livro") )
-                .andExpect( jsonPath( "autor").value("Autor") )
-                .andExpect( jsonPath( "isbn").value("123456") );
+                .andExpect( jsonPath( "title").value(dto.getTitle()) )
+                .andExpect( jsonPath( "autor").value(dto.getAutor()) )
+                .andExpect( jsonPath( "isbn").value(dto.getIsbn()) );
 
     }
 

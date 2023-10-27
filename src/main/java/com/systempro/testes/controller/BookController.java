@@ -16,10 +16,10 @@ public class BookController {
     public BookDTO create() {
 
         BookDTO dto = new BookDTO();
-        dto.setAutor("Autor");
+        dto.setAutor("Fernando");
         dto.setTitle("Meu Livro");
         dto.setIsbn("123456");
-        dto.setId(1l);
+        dto.setId(1L);
         return dto;
     }
 }
