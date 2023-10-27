@@ -16,3 +16,15 @@ dto.setAutor("Autor");
 dto.setTitle("Meu Livro");
 dto.setIsbn("123456");
 dto.setId(1l);
+
+
+criamos agora um JSON para não passar mais o json null
+
+BookDTO dto = BookDTO
+.builder()
+.id(1L)
+.autor("Fernando")
+.title("Meu Livro")
+.isbn("123456")
+.build();
+String json = new ObjectMapper().writeValueAsString(dto);
