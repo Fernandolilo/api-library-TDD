@@ -10,7 +10,8 @@ e criado o BookDTO apenas para testes,
 temos agora um test ok.
 
 3 passando dados staticos para teste e test ok;
-```
+```lombok.config
+    
 BookDTO dto = new BookDTO();
 dto.setAutor("Autor");
 dto.setTitle("Meu Livro");
@@ -19,7 +20,7 @@ dto.setId(1l);
 ```
 criamos agora um JSON para não passar mais o json null
 
-```
+```lombok.config
 BookDTO dto = BookDTO
 .builder()
 .id(1L)
@@ -27,6 +28,7 @@ BookDTO dto = BookDTO
 .title("Meu Livro")
 .isbn("123456")
 .build();
+
 String json = new ObjectMapper().writeValueAsString(dto);
 @Test
 @DisplayName("Created Book")
@@ -38,13 +40,12 @@ BookDTO dto = BookDTO
 .isbn("123456")
 .build();
 String json = new ObjectMapper().writeValueAsString(dto);
-/*
 ```
 * quando formos salvar um Book não será mais um json coforme montamos, mas será um book
 * para isto implementamos o service a baixo.class
 */
  
-```
+```lombok.config
   Book saveBook = Book.builder()
   .id(10L)
   .autor("Fernando")
@@ -70,7 +71,7 @@ String json = new ObjectMapper().writeValueAsString(dto);
 * quando formos salvar um Book não será mais um json coforme montamos, mas será um book
 * para isto implementamos o service a baixo.class
 */
-```
+```lombok.config
   Book saveBook = Book.builder()
   .id(10L)
   .autor("Fernando")
@@ -83,7 +84,7 @@ String json = new ObjectMapper().writeValueAsString(dto);
 refatoramo nosso test, agora passando um DTO para salvar uma entidade, e retornado um DTO.
 nosso test ficou desta forma retornando sucesso!
 
-```
+```lombok.config
 @Test
 @DisplayName("Created Book")
 public void createBookTest() throws Exception {
@@ -100,7 +101,7 @@ String json = new ObjectMapper().writeValueAsString(dto);
 * para isto implementamos o service a baixo.class
 */
   
-  ```
+```lombok.config
   Book saveBook = Book.builder()
   .id(10L)
   .autor("Fernando")
@@ -111,7 +112,7 @@ String json = new ObjectMapper().writeValueAsString(dto);
   BDDMockito.given(service.save(Mockito.any(Book.class))).willReturn(saveBook);
 ```
 
-
+```java
 @RestController
 @RequestMapping(value = "/books")
 public class BookController {
@@ -143,7 +144,7 @@ private final BookService service;
 }
 ```
 add o Model mapper ao no cod com intuito de diminuir o cod, tornando o mais clean., 
-```
+```xml
  <!-- https://mvnrepository.com/artifact/org.modelmapper/modelmapper -->
         <dependency>
             <groupId>org.modelmapper</groupId>
@@ -154,7 +155,7 @@ add o Model mapper ao no cod com intuito de diminuir o cod, tornando o mais clea
 
 nosso controller agora esta mais limpo
 
-```
+```java
 @RestController
 @RequestMapping(value = "/books")
 public class BookController {
@@ -178,4 +179,76 @@ private final ModelMapper modelMapper;
     }
 }
 
+```
+Criamos agora nosso service para de fato salvar no banco de dados
+
+
+```java
+@Service
+public class BookServiceImpl implements BookService {
+private final BookRepository repository;
+
+    public BookServiceImpl(BookRepository repository) {
+        this.repository = repository;
+    }
+    @Override
+    public Book save(Book book) {
+        return repository.save(book);
+    }
+}
+
+```
+nosso service test para testar a implementação via mockito, salvando um book;
+
+```java
+@ActiveProfiles("test")
+@ExtendWith(SpringExtension.class)
+public class BookServiceTest {
+
+    BookService service;
+    @MockBean
+    BookRepository repository;
+
+    /*  esta anotação  @BeforeEach faz com que o metodo setUp seja
+     * execultado antes de todos os tests
+     */
+
+    @BeforeEach
+    public void setUp() {
+        this.service = new BookServiceImpl(repository);
+    }
+
+    @Test
+    @DisplayName("Deve salvar um livro")
+    public void saveBookTest() {
+        // cenario
+        Book book =
+                Book
+                        .builder()
+                        .autor("Fulano")
+                        .title("Livro do sicrano")
+                        .isbn("123")
+                        .build();
+
+        Mockito.when(repository.save(book)).thenReturn(
+                Book
+                        .builder()
+                        .id(1L)
+                        .autor("Fulano")
+                        .title("Livro do sicrano")
+                        .isbn("123")
+                        .build());
+        // excução
+
+        Book savedBook = service.save(book);
+
+        // vedificação
+
+        //assert ta dizendo verifique se id não é nulo
+        assertThat(savedBook.getId()).isNotNull();
+        assertThat(savedBook.getAutor()).isEqualTo("Fulano");
+        assertThat(savedBook.getTitle()).isEqualTo("Livro do sicrano");
+        assertThat(savedBook.getIsbn()).isEqualTo("123");
+    }
+}
 ```
