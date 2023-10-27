@@ -1,6 +1,7 @@
 package com.systempro.testes.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.systempro.testes.domain.Book;
 import com.systempro.testes.domain.dto.BookDTO;
 import com.systempro.testes.services.BookService;
 import org.junit.jupiter.api.DisplayName;
@@ -18,6 +19,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -41,7 +43,6 @@ public class BookControllerTest {
     public void createBookTest() throws Exception {
         BookDTO dto = BookDTO
                 .builder()
-                .id(1L)
                 .autor("Fernando")
                 .title("Meu Livro")
                 .isbn("123456")
@@ -49,9 +50,17 @@ public class BookControllerTest {
         String json = new ObjectMapper().writeValueAsString(dto);
         /*
          *    quando formos salvar um Book não será mais um json coforme montamos, mas será um book
-         *    para isto implementamos o service a baixo.
+         *    para isto implementamos o service a baixo.class
          */
-        BDDMockito.given(service.save(Mockito.any(Book.class))).willReturn(null);
+        Book saveBook = Book.builder()
+                .id(10L)
+                .autor("Fernando")
+                .title("Meu Livro")
+                .isbn("123456")
+                .build();
+
+        BDDMockito.given(service.save(Mockito.any(Book.class))).willReturn(saveBook);
+
 
 
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(BOOK_API)
