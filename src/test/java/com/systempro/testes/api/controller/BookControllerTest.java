@@ -2,12 +2,16 @@ package com.systempro.testes.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.systempro.testes.domain.dto.BookDTO;
+import com.systempro.testes.services.BookService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.BDDMockito;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -29,10 +33,12 @@ public class BookControllerTest {
 
     @Autowired
     MockMvc mvc;
+    @MockBean
+    BookService service;
 
     @Test
     @DisplayName("Created Book")
-    public void createBookTest() throws Exception{
+    public void createBookTest() throws Exception {
         BookDTO dto = BookDTO
                 .builder()
                 .id(1L)
@@ -41,6 +47,12 @@ public class BookControllerTest {
                 .isbn("123456")
                 .build();
         String json = new ObjectMapper().writeValueAsString(dto);
+        /*
+         *    quando formos salvar um Book não será mais um json coforme montamos, mas será um book
+         *    para isto implementamos o service a baixo.
+         */
+        BDDMockito.given(service.save(Mockito.any(Book.class))).willReturn(null);
+
 
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(BOOK_API)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -49,11 +61,11 @@ public class BookControllerTest {
 
         mvc
                 .perform(request)
-                .andExpect(status().isCreated() )
-                .andExpect( jsonPath( "id").isNotEmpty() )
-                .andExpect( jsonPath( "title").value(dto.getTitle()) )
-                .andExpect( jsonPath( "autor").value(dto.getAutor()) )
-                .andExpect( jsonPath( "isbn").value(dto.getIsbn()) );
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("id").isNotEmpty())
+                .andExpect(jsonPath("title").value(dto.getTitle()))
+                .andExpect(jsonPath("autor").value(dto.getAutor()))
+                .andExpect(jsonPath("isbn").value(dto.getIsbn()));
 
     }
 
