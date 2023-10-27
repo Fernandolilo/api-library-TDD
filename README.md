@@ -42,8 +42,8 @@ String json = new ObjectMapper().writeValueAsString(dto);
 ```
 * quando formos salvar um Book não será mais um json coforme montamos, mas será um book
 * para isto implementamos o service a baixo.class
-  */
-* 
+*/
+ 
 ```
   Book saveBook = Book.builder()
   .id(10L)
@@ -69,9 +69,8 @@ String json = new ObjectMapper().writeValueAsString(dto);
 
 * quando formos salvar um Book não será mais um json coforme montamos, mas será um book
 * para isto implementamos o service a baixo.class
-  */
-* 
-* ```
+*/
+```
   Book saveBook = Book.builder()
   .id(10L)
   .autor("Fernando")
