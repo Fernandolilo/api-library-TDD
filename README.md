@@ -305,3 +305,40 @@ test de regra de negocio, caso haja algum dado em duplicidade retorna  um erro p
 
     }
 ```
+
+passando para o service a responsabilidade de veificar com paramentros no metodo se ISBN ja existe;
+caso exista retorna uma exceção
+
+```java
+@Test
+    @DisplayName("ISBN Duplicate")
+    public void shouldNotSaveAsBookWithDuplicatedISBN() {
+        //cenarion
+        Book book = createdValidBook();
+        /*
+        quando meu test verificar  o repository.existsByIsbn, passando qualquer string
+        tipo Mockito.anyString() vai retornar verdadeiro ==thenReturn(true);
+        */
+        Mockito.when(repository.existsByIsbn(Mockito.anyString())).thenReturn(true);
+
+        //exceução
+        Throwable exeptions = Assertions.catchThrowable(() -> service.save(book));
+
+        //verificação
+        assertThat(exeptions)
+                .isInstanceOf(BusinessException.class)
+                .hasMessage("ISBN duplicate");
+
+        //verifique se meu repository nunva (,Mockito.never())  vai execultar o metodo de salvar este book
+        Mockito.verify(repository, Mockito.never()).save(book);
+    }
+
+    private static Book createdValidBook() {
+        return Book
+                .builder()
+                .autor("Fulano")
+                .title("Livro do sicrano")
+                .isbn("123")
+                .build();
+    }
+```

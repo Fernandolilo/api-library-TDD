@@ -1,8 +1,10 @@
 package com.systempro.testes.services;
 
 import com.systempro.testes.domain.Book;
+import com.systempro.testes.exceptions.BusinessException;
 import com.systempro.testes.repositories.BookRepository;
 import com.systempro.testes.services.impl.BookServiceImpl;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,13 +37,7 @@ public class BookServiceTest {
     @DisplayName("Deve salvar um livro")
     public void saveBookTest() {
         // cenario
-        Book book =
-                Book
-                        .builder()
-                        .autor("Fulano")
-                        .title("Livro do sicrano")
-                        .isbn("123")
-                        .build();
+        Book book = createdValidBook();
 
         Mockito.when(repository.save(book)).thenReturn(
                 Book
@@ -62,5 +58,38 @@ public class BookServiceTest {
         assertThat(savedBook.getAutor()).isEqualTo("Fulano");
         assertThat(savedBook.getTitle()).isEqualTo("Livro do sicrano");
         assertThat(savedBook.getIsbn()).isEqualTo("123");
+    }
+
+
+    @Test
+    @DisplayName("ISBN Duplicate")
+    public void shouldNotSaveAsBookWithDuplicatedISBN() {
+        //cenarion
+        Book book = createdValidBook();
+        /*
+        quando meu test verificar  o repository.existsByIsbn, passando qualquer string
+        tipo Mockito.anyString() vai retornar verdadeiro ==thenReturn(true);
+        */
+        Mockito.when(repository.existsByIsbn(Mockito.anyString())).thenReturn(true);
+
+        //exceução
+        Throwable exeptions = Assertions.catchThrowable(() -> service.save(book));
+
+        //verificação
+        assertThat(exeptions)
+                .isInstanceOf(BusinessException.class)
+                .hasMessage("ISBN duplicate");
+
+        //verifique se meu repository nunva (,Mockito.never())  vai execultar o metodo de salvar este book
+        Mockito.verify(repository, Mockito.never()).save(book);
+    }
+
+    private static Book createdValidBook() {
+        return Book
+                .builder()
+                .autor("Fulano")
+                .title("Livro do sicrano")
+                .isbn("123")
+                .build();
     }
 }
