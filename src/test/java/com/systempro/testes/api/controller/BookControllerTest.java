@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.systempro.testes.domain.Book;
 import com.systempro.testes.domain.dto.BookDTO;
+import com.systempro.testes.exceptions.BusinessException;
 import com.systempro.testes.services.BookService;
 import org.apache.tomcat.util.file.Matcher;
 import org.hamcrest.Matchers;
@@ -92,6 +93,33 @@ public class BookControllerTest {
         mvc.perform(request)
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("errors" , hasSize(3)));
+    }
+
+    private BookDTO createNewBook(){
+        return BookDTO
+                .builder()
+                .autor("Fernando")
+                .title("Meu Livro")
+                .isbn("123456")
+                .build();
+    }
+    @Test
+    @DisplayName("ISBN duplicate")
+    public void createdBookWinthDuplicateIsbn()throws Exception{
+        BookDTO dto = createNewBook();
+        String json = new ObjectMapper().writeValueAsString(dto);
+        String messageError = "ISBN duplicate";
+        BDDMockito.given(service.save(Mockito.any(Book.class)))
+                .willThrow(new BusinessException(messageError));
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(BOOK_API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(json);
+        mvc.perform(request)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("errors" , hasSize(1)))
+                .andExpect(jsonPath("errors[0]").value(messageError));
+
     }
 
 }

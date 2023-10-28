@@ -283,3 +283,25 @@ dentro de nosso controller foi feito este handler com proposito de verificar ape
         return new ApiErrors(bindingResult);
     }
 ```
+
+test de regra de negocio, caso haja algum dado em duplicidade retorna  um erro para nós
+```java
+   @Test
+    @DisplayName("ISBN duplicate")
+    public void createdBookWinthDuplicateIsbn()throws Exception{
+        BookDTO dto = createNewBook();
+        String json = new ObjectMapper().writeValueAsString(dto);
+        String messageError = "ISBN duplicate";
+        BDDMockito.given(service.save(Mockito.any(Book.class)))
+                .willThrow(new BusinessException(messageError));
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(BOOK_API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(json);
+        mvc.perform(request)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("errors" , hasSize(1)))
+                .andExpect(jsonPath("errors[0]").value(messageError));
+
+    }
+```

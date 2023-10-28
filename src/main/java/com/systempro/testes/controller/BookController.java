@@ -3,15 +3,14 @@ package com.systempro.testes.controller;
 import com.systempro.testes.domain.Book;
 import com.systempro.testes.domain.dto.BookDTO;
 import com.systempro.testes.exceptions.ApiErrors;
+import com.systempro.testes.exceptions.BusinessException;
 import com.systempro.testes.services.BookService;
 import org.modelmapper.ModelMapper;
-import org.springframework.boot.context.properties.bind.BindResult;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
-import javax.naming.Binding;
 import javax.validation.Valid;
 
 @RestController
@@ -41,4 +40,11 @@ public class BookController {
        BindingResult bindingResult = exception.getBindingResult();
         return new ApiErrors(bindingResult);
     }
+
+    @ExceptionHandler(BusinessException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiErrors handlerBusinessException(BusinessException exception) {
+        return new ApiErrors(exception);
+    }
+
 }
