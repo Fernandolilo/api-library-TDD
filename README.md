@@ -252,3 +252,34 @@ public class BookServiceTest {
     }
 }
 ```
+
+agora vamos testar a seguinte coisa, caso alguem tente salvar um novo livro,
+caso passe algum dado faltando nos trara uma informacao de error
+
+```java
+    @Test
+    @DisplayName("Created Invalid Book")
+    public void createInvalidBookTest() throws Exception {
+        String json = new ObjectMapper().writeValueAsString(new BookDTO());
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(BOOK_API)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(json);
+
+        mvc.perform(request)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("errors" , hasSize(3)));
+    }
+
+```
+
+dentro de nosso controller foi feito este handler com proposito de verificar apenas se o corpo esta vindo completo
+
+```java
+ @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiErrors handleValidExceptions(MethodArgumentNotValidException exception){
+       BindingResult bindingResult = exception.getBindingResult();
+        return new ApiErrors(bindingResult);
+    }
+```
