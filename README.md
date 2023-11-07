@@ -342,3 +342,63 @@ caso exista retorna uma exceção
                 .build();
     }
 ```
+
+nete test vamos validar um livro existente, findByExists com RepositoryTest
+
+```java
+package com.systempro.testes.repository;
+
+import com.systempro.testes.domain.Book;
+import com.systempro.testes.repositories.BookRepository;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import static org.assertj.core.api.Assertions.assertThat;
+
+
+@ExtendWith(SpringExtension.class)
+@ActiveProfiles("test")
+@DataJpaTest
+public class BookRepositoryTest {
+
+    @Autowired
+    TestEntityManager entityManager;
+
+    @Autowired
+    BookRepository bookRepository;
+
+    @Test
+    @DisplayName("Deve retornar verdadeiro quando existit um livro na base com isbn  informado")
+    public void returnTrueWhenIsbnExisits() {
+        //cenario
+        /*passando um ISBN mock*/
+        String isbn = "123";
+        
+        /*Intanciando um Book no BD*/
+        Book book = Book.builder()
+                .autor("Fulano")
+                .title("Livro do sicrano")
+                .isbn(isbn)
+                .build();
+        
+        /*Chamando um entityManager que é do JPA para persistir o Book no BD */
+        entityManager.persist(book);
+
+        //execução
+ 
+        /* 
+        fazendo uma veirificação se o ISBN existe, 
+        caso sim retorna true na verificação a baixo
+        */ 
+        boolean exixts = bookRepository.existsByIsbn(isbn);
+        //verificação
+
+        assertThat(exixts).isTrue();
+    }
+}
+```

@@ -38,6 +38,7 @@ public class BookServiceTest {
     public void saveBookTest() {
         // cenario
         Book book = createdValidBook();
+        Mockito.when(repository.existsByIsbn(Mockito.anyString())).thenReturn(false);
 
         Mockito.when(repository.save(book)).thenReturn(
                 Book
