@@ -1,13 +1,10 @@
 package com.systempro.testes.api.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.systempro.testes.domain.Book;
 import com.systempro.testes.domain.dto.BookDTO;
 import com.systempro.testes.exceptions.BusinessException;
 import com.systempro.testes.services.BookService;
-import org.apache.tomcat.util.file.Matcher;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -95,14 +93,7 @@ public class BookControllerTest {
                 .andExpect(jsonPath("errors" , hasSize(3)));
     }
 
-    private BookDTO createNewBook(){
-        return BookDTO
-                .builder()
-                .autor("Fernando")
-                .title("Meu Livro")
-                .isbn("123456")
-                .build();
-    }
+
     @Test
     @DisplayName("ISBN duplicate")
     public void createdBookWinthDuplicateIsbn()throws Exception{
@@ -122,4 +113,43 @@ public class BookControllerTest {
 
     }
 
+    @Test
+    @DisplayName("Deve obter dados de um livro por ID")
+    public void getBookById() throws Exception {
+
+        //cenario  (given)
+        Long id = 1L;
+
+        Book book = Book.builder()
+                .id(id)
+                .autor(createNewBook().getAutor())
+                .title(createNewBook().getTitle())
+                .isbn(createNewBook().getIsbn())
+                .build();
+
+        BDDMockito.given(service.getById(id)).willReturn(Optional.of(book));
+
+        //execução (when)
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .get(BOOK_API.concat("/" + id))
+                .accept(MediaType.APPLICATION_JSON);
+
+        mvc
+                .perform(request)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("id").value(id))
+                .andExpect(jsonPath("title").value(createNewBook().getTitle()))
+                .andExpect(jsonPath("autor").value(createNewBook().getAutor()))
+                .andExpect(jsonPath("isbn").value(createNewBook().getIsbn()));;
+    }
+
+    private BookDTO createNewBook() {
+        return BookDTO
+                .builder()
+                .autor("Fernando")
+                .title("Meu Livro")
+                .isbn("123456")
+                .build();
+    }
 }

@@ -6,6 +6,8 @@ import com.systempro.testes.repositories.BookRepository;
 import com.systempro.testes.services.BookService;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class BookServiceImpl implements BookService {
     private final BookRepository repository;
@@ -19,5 +21,10 @@ public class BookServiceImpl implements BookService {
             throw new BusinessException("ISBN duplicate");
         }
         return repository.save(book);
+    }
+
+    @Override
+    public Optional<Book> getById(Long id) {
+        return Optional.empty();
     }
 }

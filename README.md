@@ -402,3 +402,69 @@ public class BookRepositoryTest {
     }
 }
 ```
+
+para implementar um findById 
+
+01 -> criamos este test
+
+```java
+@Test
+    @DisplayName("Deve obter dados de um livro por ID")
+    public void getBookById() throws Exception {
+
+        //cenario  (given)
+        Long id = 1L;
+
+        Book book = Book.builder()
+                .id(id)
+                .autor(createNewBook().getAutor())
+                .title(createNewBook().getTitle())
+                .isbn(createNewBook().getIsbn())
+                .build();
+
+        BDDMockito.given(service.getById(id)).willReturn(Optional.of(book));
+
+        //execução (when)
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .get(BOOK_API.concat("/" + id))
+                .accept(MediaType.APPLICATION_JSON);
+
+        mvc
+                .perform(request)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("id").value(id))
+                .andExpect(jsonPath("title").value(createNewBook().getTitle()))
+                .andExpect(jsonPath("autor").value(createNewBook().getAutor()))
+                .andExpect(jsonPath("isbn").value(createNewBook().getIsbn()));;
+    }
+
+```
+
+
+no nosso service criamos o nosso getById
+
+```java
+ Optional<Book> getById(Long id);
+```
+agora no nosso service.Impl refletimos nosso cod
+
+```java
+  @Override
+    public Optional<Book> getById(Long id) {
+        return Optional.empty();
+    }
+```
+
+veja a sequencia primeiro no ControlerTest, apos service, por fim no  service.Impl
+
+no controller getById test ok
+
+```java
+  @GetMapping(value = "/{id}")
+    public BookDTO getById(@PathVariable Long id) {
+        Book book = service.getById(id).get();
+        return modelMapper.map(book, BookDTO.class);
+    }
+
+```
