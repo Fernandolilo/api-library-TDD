@@ -513,3 +513,37 @@ efetuando uma auteração no nosso findById para que este test fosse execultado 
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 ```
+
+crimanos dois tests para analisar a deleção, um com retorno de 204 No_Content, outro com um 400 Not Found
+por que implementado ambos, caso seja deletado precisamos de um retorno de alguma informação da API,para isto temos o retorno do rest == 204
+caso haja algum erro teremos um retorna da API com uma exceção de Not Found quando nada foi achado.
+```java
+  @Test
+    @DisplayName("Deve deletar um livro")
+    public void deleteBookTests() throws Exception{
+
+        BDDMockito.given(service.getById(Mockito.anyLong())).willReturn(Optional.of(Book.builder().id(1l).build()));
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .delete(BOOK_API.concat("/" + 1))
+                .accept(MediaType.APPLICATION_JSON);
+
+        mvc.perform( request )
+                .andExpect( status().isNoContent() );
+    }
+
+    @Test
+    @DisplayName("Deve retornar resourcer not found quando não encontrar um livro para deletar")
+    public void deleteInexistentBookTests() throws Exception{
+
+        BDDMockito.given(service.getById(Mockito.anyLong())).willReturn(Optional.empty());
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .delete(BOOK_API.concat("/" + 1))
+                .accept(MediaType.APPLICATION_JSON);
+
+        mvc.perform( request )
+                .andExpect( status().isNotFound() );
+    }
+
+```
