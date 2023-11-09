@@ -187,6 +187,54 @@ public class BookControllerTest {
                 .andExpect( status().isNotFound() );
     }
 
+    @Test
+    @DisplayName("Deve  atualizar um livro  ")
+    public void updateBook() throws Exception {
+
+        Long id = 1l;
+        // cria o json
+        String json = new ObjectMapper().writeValueAsString(createNewBook());
+
+
+        //pega o objeto completo
+        Book updateBook = Book.builder()
+                .id(id)
+                .autor("some autor")
+                .title("some livro")
+                .isbn("456789")
+                .build();
+
+
+        //faz a atualização
+        Book updetedBook = Book.builder()
+                .id(id)
+                .autor("Fernando")
+                .title("Meu Livro")
+                .isbn("123456")
+                .build();
+
+        BDDMockito.given(service.getById(id))
+                .willReturn(Optional.of(updateBook));
+
+        BDDMockito.given(service.update(updateBook)).willReturn(updetedBook);
+
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .put(BOOK_API.concat("/" + 1))
+                .accept(MediaType.APPLICATION_JSON)
+                .content(json)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("id").value(id))
+                .andExpect(jsonPath("title").value(createNewBook().getTitle()))
+                .andExpect(jsonPath("autor").value(createNewBook().getAutor()))
+                .andExpect(jsonPath("isbn").value(createNewBook().getIsbn()));
+
+    }
+
 
     private BookDTO createNewBook() {
         return BookDTO
