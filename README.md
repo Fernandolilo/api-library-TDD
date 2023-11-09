@@ -468,3 +468,48 @@ no controller getById test ok
     }
 
 ```
+
+implementado agora  NotFoundException
+
+```java
+ @Test
+    @DisplayName("Deve retornar resource not found quando o livro procurado não existir ")
+    public void bookNotFoundTest() throws Exception {
+
+        BDDMockito.given(service.getById(Mockito.anyLong())).willReturn(Optional.empty());
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .get(BOOK_API.concat("/" + 1))
+                .accept(MediaType.APPLICATION_JSON);
+
+        mvc
+                .perform(request)
+                .andExpect(status().isNotFound());
+
+    }
+```
+
+nosso endpoint estava sem tratamento de erros
+
+```java
+ @GetMapping(value = "/{id}")
+    public BookDTO getById(@PathVariable Long id) {
+
+        return service.getById(id).map(book -> )
+        Book book = service.getById(id).get( modelMapper.map(book, BookDTO.class) );
+        return
+    }
+```
+
+efetuando uma auteração no nosso findById para que este test fosse execultado com sucesso!
+
+```java
+ @GetMapping(value = "/{id}")
+    public BookDTO getById(@PathVariable Long id) {
+
+        return service
+                .getById(id)
+                .map(book -> modelMapper.map(book, BookDTO.class))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+```
