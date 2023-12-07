@@ -657,3 +657,25 @@ test para livro inexistente
         assertThat( findByBook.get() .getIsbn() ).isEqualTo(book.getIsbn());
     }
 ```
+
+Teste de integração...
+
+findbyId para um livro 
+
+```java
+    @Test
+    @DisplayName("Deve obter um livro por id")
+    public void findByIdTest(){
+
+        //cenario
+        Book book = createNewBook("123");
+        entityManager.persist(book);
+
+        //execução
+      Optional<Book> foundBook = bookRepository.findById(book.getId());
+
+      //verificação
+        assertThat(foundBook.isPresent()).isTrue();
+
+    }
+```
