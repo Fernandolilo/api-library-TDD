@@ -14,6 +14,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles("test")
@@ -85,6 +87,49 @@ public class BookServiceTest {
         Mockito.verify(repository, Mockito.never()).save(book);
     }
 
+    @DisplayName("Deve retornar um livro por id")
+    @Test
+    public void getLivroByIdTest(){
+        Long id = 1L;
+        // estancia um book
+        Book book= createdValidBook();
+
+        book.setId(id);
+
+        //verifica se há um book
+        Mockito.when(repository.findById(id)).thenReturn(Optional.empty());
+
+        // execução de test
+        Optional<Book> findByBook = service.getById(id);
+
+        //verificação
+        assertThat(findByBook.isPresent()).isFalse();
+
+    }
+
+
+    @DisplayName("Not found by id livro")
+    @Test
+    public void getNotFoundLivroIdTest(){
+        Long id = 1L;
+        // estancia um book
+        Book book= createdValidBook();
+
+        book.setId(id);
+
+        //verifica se há um book
+        Mockito.when(repository.findById(id)).thenReturn(Optional.of(book));
+
+        // execução de test
+        Optional<Book> findByBook = service.getById(id);
+
+        //verificação
+        assertThat(findByBook.isPresent()).isTrue();
+        assertThat( findByBook.get() .getId() ).isEqualTo(id);
+        assertThat( findByBook.get() .getAutor() ).isEqualTo(book.getAutor());
+        assertThat( findByBook.get() .getTitle() ).isEqualTo(book.getTitle());
+        assertThat( findByBook.get() .getIsbn() ).isEqualTo(book.getIsbn());
+    }
     private static Book createdValidBook() {
         return Book
                 .builder()

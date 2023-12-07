@@ -599,6 +599,61 @@ como acima ja descrito, são dois tests um para update ok e outro para not found
                 .andExpect(jsonPath("isbn").value(createNewBook().getIsbn()));
 
     }
+```
+    
+test para veirificar uma busca por ID de um livro 
+        
+```java
+@DisplayName("Deve retornar um livro por id")
+    @Test
+    public void getLivroByIdTest(){
+        Long id = 1L;
+        // estancia um book
+        Book book= createdValidBook();
+
+        book.setId(id);
+
+        //verifica se há um book
+        Mockito.when(repository.findById(id)).thenReturn(Optional.empty());
+
+        // execução de test
+        Optional<Book> findByBook = service.getById(id);
+
+        //verificação
+        assertThat(findByBook.isPresent()).isFalse();
+
+    }
 
 
+@Override
+public Optional<Book> getById(Long id) {
+    return repository.findById(id);
+}
+```
+
+test para livro inexistente
+
+```java
+ @DisplayName("Not found by id livro")
+    @Test
+    public void getNotFoundLivroIdTest(){
+        Long id = 1L;
+        // estancia um book
+        Book book= createdValidBook();
+
+        book.setId(id);
+
+        //verifica se há um book
+        Mockito.when(repository.findById(id)).thenReturn(Optional.of(book));
+
+        // execução de test
+        Optional<Book> findByBook = service.getById(id);
+
+        //verificação
+        assertThat(findByBook.isPresent()).isTrue();
+        assertThat( findByBook.get() .getId() ).isEqualTo(id);
+        assertThat( findByBook.get() .getAutor() ).isEqualTo(book.getAutor());
+        assertThat( findByBook.get() .getTitle() ).isEqualTo(book.getTitle());
+        assertThat( findByBook.get() .getIsbn() ).isEqualTo(book.getIsbn());
+    }
 ```
