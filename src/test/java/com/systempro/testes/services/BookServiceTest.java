@@ -130,6 +130,39 @@ public class BookServiceTest {
         assertThat( findByBook.get() .getTitle() ).isEqualTo(book.getTitle());
         assertThat( findByBook.get() .getIsbn() ).isEqualTo(book.getIsbn());
     }
+    @Test
+    @DisplayName("Deve deletar um livro")
+    public void deleteBooktest(){
+
+        Book book = Book.builder().id(1L).build();
+
+        //execução
+       org.junit.jupiter.api.Assertions.assertDoesNotThrow(  () ->
+               service.delete(book));
+
+        //verificação
+
+        Mockito
+                .verify( repository, Mockito.times( 1))
+                .delete(book);
+
+}
+        @Test
+        @DisplayName("Deve lancar um error ao tentar deletar um livro")
+        public void deleteInvalidBookTest(){
+            Book book = new Book();
+
+            org.junit.jupiter.api.Assertions.assertThrows(
+                    IllegalArgumentException.class,() ->
+                    service.delete(book));
+
+            Mockito
+                    .verify( repository, Mockito.never() )
+                    .delete(book);
+        }
+
+
+
     private static Book createdValidBook() {
         return Book
                 .builder()
