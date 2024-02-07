@@ -1,9 +1,11 @@
 package com.systempro.testes.services;
 
-import com.systempro.testes.domain.Book;
-import com.systempro.testes.exceptions.BusinessException;
-import com.systempro.testes.repositories.BookRepository;
-import com.systempro.testes.services.impl.BookServiceImpl;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,12 +13,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import com.systempro.testes.domain.Book;
+import com.systempro.testes.exceptions.BusinessException;
+import com.systempro.testes.repositories.BookRepository;
+import com.systempro.testes.services.impl.BookServiceImpl;
 
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
@@ -202,6 +209,36 @@ public class BookServiceTest {
         assertThat(book.getTitle()).isEqualTo(updateBook.getTitle());
         assertThat(book.getIsbn()).isEqualTo(updateBook.getIsbn());
     }
+    
+    
+    @Test
+    void findBookTests() {
+        // Criar um livro válido
+        Book book = createdValidBook();
+        
+        // Criar uma solicitação de página
+        PageRequest pageRequest = PageRequest.of(0, 10);
+        
+        List<Book> list = Collections.singletonList(book);
+        
+        // Criar uma página com o livro criado
+        Page<Book> page = new PageImpl<>(list, pageRequest, 1);
+        
+        // Configurar o comportamento do repositório mock
+        Mockito.when(repository.findAll(Mockito.any(Example.class), Mockito.eq(pageRequest)))
+               .thenReturn(page);
+        
+        // Chamar o método find do serviço
+       Page<Book> result = service.find(book, pageRequest);
+       
+       //verificação
+       assertThat(result.getTotalElements()).isEqualTo(1);
+       assertThat(result.getContent()).isEqualTo(list);
+       assertThat(result.getPageable().getPageNumber()).isEqualTo(0);
+       assertThat(result.getPageable().getPageSize()).isEqualTo(10);
+       
+    }
+
 
     private static Book createdValidBook() {
         return Book
